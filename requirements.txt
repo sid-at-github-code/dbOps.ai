@@ -1,0 +1,28 @@
+# Web frameworks
+fastapi>=0.111.0
+flask>=3.0.0
+uvicorn[standard]>=0.29.0
+
+# Twilio
+twilio>=9.0.0
+
+# AI
+openai>=1.30.0
+
+# Telegram
+python-telegram-bot>=21.0.0
+
+# NL-to-SQL
+psycopg2-binary>=2.9.0
+pydantic-settings>=2.0.0
+
+# Testing
+pytest>=8.0.0
+
+# Static file serving
+aiofiles>=23.0.0
+
+# Utilities
+python-dotenv>=1.0.0
+pydantic>=2.7.0
+websockets>=12.0
