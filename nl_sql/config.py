@@ -11,9 +11,11 @@ class NlSqlSettings(BaseSettings):
 
     # LLM
     openai_api_key: str = ""
-    llm_model: str = "gpt-4o-mini"
+    openrouter_api_key: str = ""
+    llm_model: str = "openai/gpt-4o-mini"
 
-    # PostgreSQL
+    # PostgreSQL — individual params OR a full URI (URI takes precedence)
+    supabase_uri: str = ""
     db_host: str = "localhost"
     db_port: int = 5432
     db_name: str = ""

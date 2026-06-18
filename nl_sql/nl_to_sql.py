@@ -16,7 +16,13 @@ _client: OpenAI | None = None
 def _get_client() -> OpenAI:
     global _client
     if _client is None:
-        _client = OpenAI(api_key=settings.openai_api_key)
+        if settings.openrouter_api_key:
+            _client = OpenAI(
+                api_key=settings.openrouter_api_key,
+                base_url="https://openrouter.ai/api/v1",
+            )
+        else:
+            _client = OpenAI(api_key=settings.openai_api_key)
     return _client
 
 
@@ -33,7 +39,8 @@ def nl_to_sql(question: str) -> tuple[str, float]:
         {"role": "user", "content": question},
     ]
 
-    log.info("LLM request | model=%s | question=%r", settings.llm_model, question)
+    model = settings.llm_model
+    log.info("LLM request | model=%s | question=%r", model, question)
     log.debug(
         "LLM request payload | messages=%s",
         json.dumps(messages, ensure_ascii=False),
@@ -42,12 +49,12 @@ def nl_to_sql(question: str) -> tuple[str, float]:
     t0 = time.perf_counter()
     try:
         response = _get_client().chat.completions.create(
-            model=settings.llm_model,
+            model=model,
             messages=messages,  # type: ignore
             temperature=0,
         )
     except Exception:
-        log.exception("LLM call failed | model=%s | question=%r", settings.llm_model, question)
+        log.exception("LLM call failed | model=%s | question=%r", model, question)
         raise
 
     elapsed = time.perf_counter() - t0

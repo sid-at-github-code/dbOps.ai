@@ -15,8 +15,11 @@ Quick start:
 """
 
 import logging
+import os
 from openai import AsyncOpenAI
 from shared.ai import get_completion_async
+
+_DEFAULT_MODEL = os.getenv("LLM_MODEL", "openai/gpt-4o-mini")
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +32,7 @@ async def get_ai_reply(
     *,
     store,              # shared.conversation.ConversationStore
     ai_client: AsyncOpenAI,
-    model: str = "openai/gpt-4o-mini",
+    model: str = _DEFAULT_MODEL,
     temperature: float = 0.7,
     fallback: str = FALLBACK,
 ) -> str:

@@ -306,6 +306,7 @@ body {
   display: flex;
   flex-shrink: 0;
   gap: 12px;
+  justify-content: space-between;
   padding: 7px 16px;
 }
 
@@ -313,6 +314,28 @@ body {
   color: var(--muted);
   font-size: 11.5px;
 }
+
+.export-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-export {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 500;
+  gap: 5px;
+  padding: 4px 9px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-export:hover { border-color: var(--border2); color: var(--text); }
 
 .table-scroll {
   flex: 1;

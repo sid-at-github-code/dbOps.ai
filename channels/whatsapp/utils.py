@@ -18,11 +18,14 @@ Quick start:
 """
 
 import logging
+import os
 from typing import Any
 
 from twilio.twiml.messaging_response import MessagingResponse
 
 from shared.ai import get_completion
+
+_DEFAULT_MODEL = os.getenv("LLM_MODEL", "openai/gpt-4o-mini")
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +52,7 @@ def get_ai_reply(
     *,
     store,          # shared.conversation.ConversationStore
     ai_client,      # openai.OpenAI (any compatible client)
-    model: str = "openai/gpt-4o-mini",
+    model: str = _DEFAULT_MODEL,
     fallback: str = "Sorry, I'm having trouble right now. Please visit https://gloify.com for assistance.",
 ) -> str:
     """

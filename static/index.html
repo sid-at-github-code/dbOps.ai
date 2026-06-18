@@ -41,6 +41,7 @@
             id="rowLimit"
             class="input-row-limit"
             placeholder="10"
+            value="10"
             min="1"
             max="10000"
           />
@@ -105,6 +106,20 @@
       <div id="resultsState" class="results-state hidden">
         <div class="results-bar">
           <span id="rowCountLabel" class="row-count-label"></span>
+          <div class="export-btns">
+            <button id="exportCsvBtn" class="btn-export">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              CSV
+            </button>
+            <button id="exportXlsxBtn" class="btn-export">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Excel
+            </button>
+          </div>
         </div>
         <div class="table-scroll">
           <table id="resultsTable">
@@ -117,6 +132,7 @@
     </main>
   </div>
 
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

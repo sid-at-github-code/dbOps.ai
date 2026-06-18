@@ -20,6 +20,8 @@ const resultsState    = document.getElementById('resultsState');
 const rowCountLabel   = document.getElementById('rowCountLabel');
 const tableHead       = document.getElementById('tableHead');
 const tableBody       = document.getElementById('tableBody');
+const exportCsvBtn    = document.getElementById('exportCsvBtn');
+const exportXlsxBtn   = document.getElementById('exportXlsxBtn');
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let rawSQL      = '';
@@ -69,6 +71,13 @@ function isNumericVal(v) {
   return !isNaN(Number(v));
 }
 
+// Returns true if the question already contains an explicit row/record count so
+// we don't append a redundant LIMIT instruction from the UI field.
+function questionMentionsRowCount(q) {
+  return /\b(top|first|last|limit|show me|return|fetch|get)\s+\d+\b/i.test(q) ||
+         /\b\d+\s*(rows?|records?|results?|entries|items)\b/i.test(q);
+}
+
 // ── Main query flow ───────────────────────────────────────────────────────────
 async function runQuery() {
   const question = questionEl.value.trim();
@@ -91,10 +100,10 @@ async function runQuery() {
 
   try {
     const rowLimitRaw = rowLimitEl.value.trim();
-    const rowLimit = rowLimitRaw !== '' ? parseInt(rowLimitRaw, 10) : null;
-    const questionWithLimit = rowLimit !== null && rowLimit > 0
-      ? `${question}\nReturn at most ${rowLimit} rows.`
-      : question;
+    const rowLimit = rowLimitRaw !== '' ? parseInt(rowLimitRaw, 10) : 10;
+    const questionWithLimit = questionMentionsRowCount(question)
+      ? question
+      : `${question}\nReturn at most ${rowLimit} rows.`;
 
     const resp = await fetch('/api/query', {
       method: 'POST',
@@ -348,6 +357,52 @@ function _execCommandCopy(text) {
   return ok;
 }
 
+// ── Export helpers ────────────────────────────────────────────────────────────
+
+function exportFilename(ext) {
+  const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+  return `query-results-${ts}.${ext}`;
+}
+
+function exportCSV() {
+  const rows = getSortedFiltered();
+  if (!rows.length) return;
+
+  const escape = v => {
+    if (v === null || v === undefined) return '';
+    const s = typeof v === 'object' ? JSON.stringify(v) : String(v);
+    return s.includes(',') || s.includes('"') || s.includes('\n')
+      ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+
+  const header = lastCols.map(escape).join(',');
+  const body   = rows.map(row => lastCols.map(c => escape(row[c])).join(','));
+  const csv    = [header, ...body].join('\r\n');
+
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), { href: url, download: exportFilename('csv') });
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function exportExcel() {
+  const rows = getSortedFiltered();
+  if (!rows.length || typeof XLSX === 'undefined') return;
+
+  const data = [lastCols, ...rows.map(row => lastCols.map(c => {
+    const v = row[c];
+    return (v === null || v === undefined) ? '' : (typeof v === 'object' ? JSON.stringify(v) : v);
+  }))];
+
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Results');
+  XLSX.writeFile(wb, exportFilename('xlsx'));
+}
+
 // ── Event listeners ───────────────────────────────────────────────────────────
 runBtn.addEventListener('click', runQuery);
 
@@ -357,6 +412,9 @@ questionEl.addEventListener('keydown', e => {
     runQuery();
   }
 });
+
+exportCsvBtn.addEventListener('click', exportCSV);
+exportXlsxBtn.addEventListener('click', exportExcel);
 
 // Auto-focus on load
 questionEl.focus();

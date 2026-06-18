@@ -11,6 +11,8 @@ log = get_logger(__name__)
 
 
 def _get_connection():
+    if settings.supabase_uri:
+        return psycopg2.connect(settings.supabase_uri, connect_timeout=10)
     return psycopg2.connect(
         host=settings.db_host,
         port=settings.db_port,
