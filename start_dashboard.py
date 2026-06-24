@@ -7,6 +7,7 @@ Run:
 """
 
 import os
+from pathlib import Path
 
 import uvicorn
 from dotenv import load_dotenv
@@ -15,8 +16,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from api.query import router as query_router
+from api.whatsapp_webhook import router as wa_webhook_router
 
 load_dotenv()
+
+Path("output").mkdir(exist_ok=True)
 
 app = FastAPI(title="Fetcher.io Dashboard", docs_url=None, redoc_url=None)
 
@@ -30,6 +34,10 @@ app.add_middleware(
 
 # API routes MUST be registered before the static mount so they take priority
 app.include_router(query_router, prefix="/api")
+app.include_router(wa_webhook_router, prefix="/webhook")
+
+# Serve generated Excel files (must be before the catch-all static mount)
+app.mount("/output", StaticFiles(directory="output"), name="output")
 
 # Catch-all: serves index.html + static assets (style.css, app.js)
 app.mount("/", StaticFiles(directory="static", html=True), name="static")

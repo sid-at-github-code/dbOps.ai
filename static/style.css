@@ -315,6 +315,46 @@ body {
   font-size: 11.5px;
 }
 
+.bar-right {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.view-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.view-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 4px 11px;
+  transition: background 0.15s, color 0.15s;
+}
+.view-btn + .view-btn { border-left: 1px solid var(--border); }
+.view-btn:hover { color: var(--text); }
+.view-btn.active { background: var(--accent); color: #fff; }
+
+.chart-type-select {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11.5px;
+  outline: none;
+  padding: 4px 8px;
+}
+.chart-type-select:focus { border-color: var(--accent); }
+
 .export-btns {
   display: flex;
   gap: 6px;
@@ -340,6 +380,32 @@ body {
 .table-scroll {
   flex: 1;
   overflow: auto;
+}
+
+/* ── Chart view ──────────────────────────────────────────────────────────── */
+.chart-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 16px;
+}
+.chart-canvas-wrap {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+.chart-not-possible {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  flex: 1;
+  font-size: 13px;
+  justify-content: center;
+  line-height: 1.6;
+  max-width: 440px;
+  margin: 0 auto;
+  text-align: center;
 }
 .table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
 .table-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -477,3 +543,31 @@ td {
 ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
 ::selection { background: rgba(99,102,241,0.28); }
+
+/* ── WhatsApp status badge ───────────────────────────────────────────────── */
+.wa-status {
+  align-items: center;
+  border-radius: 4px;
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 500;
+  gap: 4px;
+  padding: 2px 9px;
+}
+.wa-status::before {
+  content: '';
+  border-radius: 50%;
+  display: inline-block;
+  height: 6px;
+  width: 6px;
+}
+.wa-status.wa-sent {
+  background: rgba(74, 222, 128, 0.12);
+  color: var(--green);
+}
+.wa-status.wa-sent::before  { background: var(--green); }
+.wa-status.wa-saved {
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--accent);
+}
+.wa-status.wa-saved::before { background: var(--accent); }

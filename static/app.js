@@ -23,6 +23,16 @@ const tableBody       = document.getElementById('tableBody');
 const exportCsvBtn    = document.getElementById('exportCsvBtn');
 const exportXlsxBtn   = document.getElementById('exportXlsxBtn');
 
+const viewTableBtn    = document.getElementById('viewTableBtn');
+const viewChartBtn    = document.getElementById('viewChartBtn');
+const chartTypeSelect = document.getElementById('chartTypeSelect');
+const exportPngBtn    = document.getElementById('exportPngBtn');
+const tableScroll     = document.getElementById('tableScroll');
+const chartContainer  = document.getElementById('chartContainer');
+const chartNotPossible= document.getElementById('chartNotPossible');
+const chartCanvasWrap = document.getElementById('chartCanvasWrap');
+const chartCanvas     = document.getElementById('chartCanvas');
+
 // ── State ─────────────────────────────────────────────────────────────────────
 let rawSQL      = '';
 let lastCols    = [];
@@ -30,6 +40,8 @@ let lastRows    = [];
 let sortCol     = null;
 let sortDir     = 'asc';   // 'asc' | 'desc'
 let filters     = {};
+let currentView = 'table'; // 'table' | 'chart'
+let chartInstance = null;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -318,6 +330,8 @@ function renderTable(cols, rows, count) {
 
   buildTableHeaders(cols);
   applyTable();
+  destroyChart();
+  setView('table');   // every new result starts in table view
   showPanel(resultsState);
 }
 
@@ -403,6 +417,139 @@ function exportExcel() {
   XLSX.writeFile(wb, exportFilename('xlsx'));
 }
 
+// ── Chart ─────────────────────────────────────────────────────────────────────
+
+const CHART_PALETTE = [
+  '#6366f1', '#34d399', '#fb923c', '#f87171', '#a5b4fc',
+  '#818cf8', '#facc15', '#22d3ee', '#f472b6', '#4ade80',
+];
+
+// Paints a solid background behind the chart so exported PNGs aren't transparent.
+const chartBgPlugin = {
+  id: 'solidBg',
+  beforeDraw(chart) {
+    const { ctx, width, height } = chart;
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.fillStyle = '#12131b';
+    ctx.fillRect(0, 0, width, height);
+    ctx.restore();
+  },
+};
+
+// Decide whether the current result can be charted, and which column is which.
+// Rule: exactly 2 columns, and at least one of them numeric (used as the value).
+function getChartSpec() {
+  if (lastCols.length !== 2) {
+    return {
+      ok: false,
+      reason:
+        `Graph not possible — it needs exactly 2 columns, but this result has ${lastCols.length}. ` +
+        `Ask for just a label and a number (e.g. "product name and total sales").`,
+    };
+  }
+  const isNum = buildIsNum(lastCols, lastRows);
+  const [c0, c1] = lastCols;
+  if (isNum[c1])      return { ok: true, labelCol: c0, valueCol: c1 };
+  if (isNum[c0])      return { ok: true, labelCol: c1, valueCol: c0 };
+  return {
+    ok: false,
+    reason: 'Graph not possible — neither column is numeric, so there is nothing to plot.',
+  };
+}
+
+function destroyChart() {
+  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+}
+
+function renderChart() {
+  destroyChart();
+  const spec = getChartSpec();
+
+  if (!spec.ok) {
+    chartNotPossible.textContent = spec.reason;
+    chartNotPossible.classList.remove('hidden');
+    chartCanvasWrap.classList.add('hidden');
+    exportPngBtn.classList.add('hidden');
+    return;
+  }
+  chartNotPossible.classList.add('hidden');
+  chartCanvasWrap.classList.remove('hidden');
+  exportPngBtn.classList.remove('hidden');
+
+  const rows = getSortedFiltered();
+  const labels = rows.map(r => {
+    const v = r[spec.labelCol];
+    return (v === null || v === undefined) ? '∅' : String(v);
+  });
+  const values = rows.map(r => {
+    const v = r[spec.valueCol];
+    return (v === null || v === undefined || v === '') ? null : Number(v);
+  });
+
+  const type = chartTypeSelect.value || 'bar';
+  const isPie = type === 'pie';
+  const tick = '#525878';
+  const grid = 'rgba(42,45,74,0.5)';
+
+  chartInstance = new Chart(chartCanvas, {
+    type,
+    data: {
+      labels,
+      datasets: [{
+        label: spec.valueCol,
+        data: values,
+        backgroundColor: isPie
+          ? values.map((_, i) => CHART_PALETTE[i % CHART_PALETTE.length])
+          : 'rgba(99,102,241,0.65)',
+        borderColor: isPie ? '#12131b' : '#6366f1',
+        borderWidth: isPie ? 2 : 1.5,
+        fill: type === 'line' ? false : true,
+        tension: 0.25,
+        pointRadius: 3,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 250 },
+      plugins: {
+        legend: { display: isPie, position: 'right', labels: { color: '#dde1f0', font: { size: 11 } } },
+        title: { display: true, text: `${spec.valueCol} by ${spec.labelCol}`, color: '#dde1f0', font: { size: 13, weight: '500' } },
+      },
+      scales: isPie ? {} : {
+        x: { ticks: { color: tick, maxRotation: 60, font: { size: 10 } }, grid: { color: grid } },
+        y: { ticks: { color: tick, font: { size: 10 } }, grid: { color: grid }, beginAtZero: true },
+      },
+    },
+    plugins: [chartBgPlugin],
+  });
+}
+
+function setView(view) {
+  currentView = view;
+  const chart = view === 'chart';
+  viewTableBtn.classList.toggle('active', !chart);
+  viewChartBtn.classList.toggle('active', chart);
+  tableScroll.classList.toggle('hidden', chart);
+  chartContainer.classList.toggle('hidden', !chart);
+  chartTypeSelect.classList.toggle('hidden', !chart);
+  if (chart) {
+    renderChart();
+  } else {
+    exportPngBtn.classList.add('hidden');
+  }
+}
+
+function exportPNG() {
+  if (!chartInstance) return;
+  const url = chartInstance.toBase64Image('image/png', 1);
+  const a = Object.assign(document.createElement('a'), { href: url, download: exportFilename('png') });
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
 // ── Event listeners ───────────────────────────────────────────────────────────
 runBtn.addEventListener('click', runQuery);
 
@@ -415,6 +562,11 @@ questionEl.addEventListener('keydown', e => {
 
 exportCsvBtn.addEventListener('click', exportCSV);
 exportXlsxBtn.addEventListener('click', exportExcel);
+
+viewTableBtn.addEventListener('click', () => setView('table'));
+viewChartBtn.addEventListener('click', () => setView('chart'));
+chartTypeSelect.addEventListener('change', () => { if (currentView === 'chart') renderChart(); });
+exportPngBtn.addEventListener('click', exportPNG);
 
 // Auto-focus on load
 questionEl.focus();

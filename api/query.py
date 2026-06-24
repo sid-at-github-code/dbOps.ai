@@ -1,3 +1,7 @@
+import os
+from datetime import datetime
+from pathlib import Path
+
 from fastapi import APIRouter
 from pydantic import BaseModel
 
@@ -8,6 +12,48 @@ from nl_sql.sql_validator import validate_read_only
 
 router = APIRouter()
 log = get_logger(__name__)
+
+OUTPUT_DIR = Path("output")
+
+
+def _save_excel(columns: list, rows: list, question: str) -> str:
+    import openpyxl
+    OUTPUT_DIR.mkdir(exist_ok=True)
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Results"
+    ws.append(columns)
+    for row in rows:
+        ws.append([row.get(c) for c in columns])
+    ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+    slug = "".join(c if c.isalnum() else "_" for c in question[:30]).strip("_")
+    filename = f"{ts}-{slug}.xlsx"
+    wb.save(OUTPUT_DIR / filename)
+    return filename
+
+
+def _send_whatsapp(filename: str, question: str) -> str | None:
+    from twilio.rest import Client
+    account_sid = os.getenv("TWILIO_ACCOUNT_SID")
+    auth_token  = os.getenv("TWILIO_AUTH_TOKEN")
+    base_url    = os.getenv("BASE_URL", "").rstrip("/")
+    to          = os.getenv("WHATSAPP_TO", "")
+    from_num    = os.getenv("TWILIO_WHATSAPP_FROM", "+14155238886")
+    if not all([account_sid, auth_token, base_url, to]):
+        return None
+
+    def wa(n: str) -> str:
+        return n if n.startswith("whatsapp:") else f"whatsapp:{n}"
+
+    client = Client(account_sid, auth_token)
+    media_url = f"{base_url}/output/{filename}"
+    msg = client.messages.create(
+        from_=wa(from_num),
+        to=wa(to),
+        body=f"Query results: {question}",
+        media_url=[media_url],
+    )
+    return msg.sid
 
 
 class QueryRequest(BaseModel):
@@ -56,6 +102,7 @@ async def run_query(req: QueryRequest):
     except Exception as exc:
         log.error("query | DB error | sql=%r | error=%s", sql, exc)
         result["error"] = f"DB error: {exc}"
+        return result
 
     log.info(
         "query | done | rows=%d | llm=%.3fs | db=%.3fs | error=%s",

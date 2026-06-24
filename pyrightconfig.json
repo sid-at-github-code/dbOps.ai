@@ -1,0 +1,13 @@
+{
+  "extraPaths": ["."],
+  "include": [
+    "nl_sql",
+    "api",
+    "shared",
+    "channels",
+    "calling",
+    "tests",
+    "start_dashboard.py",
+    "start_api.py"
+  ]
+}

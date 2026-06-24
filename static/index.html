@@ -106,26 +106,49 @@
       <div id="resultsState" class="results-state hidden">
         <div class="results-bar">
           <span id="rowCountLabel" class="row-count-label"></span>
-          <div class="export-btns">
-            <button id="exportCsvBtn" class="btn-export">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              CSV
-            </button>
-            <button id="exportXlsxBtn" class="btn-export">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              Excel
-            </button>
+          <div class="bar-right">
+            <div class="view-toggle">
+              <button id="viewTableBtn" class="view-btn active">Table</button>
+              <button id="viewChartBtn" class="view-btn">Chart</button>
+            </div>
+            <select id="chartTypeSelect" class="chart-type-select hidden" title="Chart type">
+              <option value="bar">Bar</option>
+              <option value="line">Line</option>
+              <option value="pie">Pie</option>
+            </select>
+            <div class="export-btns">
+              <button id="exportPngBtn" class="btn-export hidden">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                PNG
+              </button>
+              <button id="exportCsvBtn" class="btn-export">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                CSV
+              </button>
+              <button id="exportXlsxBtn" class="btn-export">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Excel
+              </button>
+            </div>
           </div>
         </div>
-        <div class="table-scroll">
+        <div class="table-scroll" id="tableScroll">
           <table id="resultsTable">
             <thead id="tableHead"></thead>
             <tbody id="tableBody"></tbody>
           </table>
+        </div>
+        <div id="chartContainer" class="chart-container hidden">
+          <p id="chartNotPossible" class="chart-not-possible hidden"></p>
+          <div id="chartCanvasWrap" class="chart-canvas-wrap">
+            <canvas id="chartCanvas"></canvas>
+          </div>
         </div>
       </div>
 
@@ -133,6 +156,7 @@
   </div>
 
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
