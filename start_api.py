@@ -21,7 +21,7 @@ load_dotenv()
 
 app = FastAPI(
     title="fetcher.io API",
-    description="Natural language → validated read-only PostgreSQL SELECT query.",
+    description="Natural language → validated read-only pg sql query in the multi-table database ",
     version="1.0.0",
 )
 
@@ -33,7 +33,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(v1_router)
+app.include_router(v1_router)+
 
 
 def _custom_openapi():
@@ -45,8 +45,8 @@ def _custom_openapi():
         description=app.description,
         routes=app.routes,
     )
-    # Register BearerAuth scheme so Swagger UI shows the Authorize button
-    schema.setdefault("components", {}).setdefault("securitySchemes", {})[
+    # register the auth token first , then proceed with the rest
+    schema.setdefault("components", {}).setdefault("securityschemes", {})[
         "BearerAuth"
     ] = {"type": "http", "scheme": "bearer"}
     app.openapi_schema = schema

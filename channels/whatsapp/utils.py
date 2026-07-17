@@ -15,6 +15,9 @@ Quick start:
     sender, text = parse_incoming(request.form)
     reply = get_ai_reply(sender, text, store=store, ai_client=client)
     return twiml_reply(reply)
+    
+    
+    utility file for main nl to sql pipepline oonly rools   
 """
 
 import logging

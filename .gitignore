@@ -47,3 +47,5 @@ htmlcov/
 *.tmp
 
 proj/
+
+output/ 
