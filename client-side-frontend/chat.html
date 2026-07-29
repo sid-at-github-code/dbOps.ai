@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Fetcher.io Chat</title>
+  <link rel="stylesheet" href="chat.css" />
+</head>
+<body>
+  <div class="app" id="app">
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <span>Fetcher.io</span>
+        <a class="nav-link" href="index.html">Dashboard →</a>
+      </div>
+      <div class="sidebar-top">
+        <button id="newChatBtn" class="new-chat-btn" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          <span>New chat</span>
+        </button>
+      </div>
+
+      <nav class="conversation-list" id="conversationList"></nav>
+
+      <div class="sidebar-bottom">
+        <button id="themeToggle" class="icon-text-btn" type="button">
+          <span id="themeIcon">☀️</span>
+          <span id="themeLabel">Light mode</span>
+        </button>
+        <div id="apiStatus" class="api-status"><span class="dot"></span><span id="apiStatusText">Checking API…</span></div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <button id="sidebarToggle" class="icon-btn" type="button" aria-label="Toggle sidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <div class="topbar-title">
+          <span class="dot"></span>
+          <span>Fetcher.io</span>
+        </div>
+        <div class="topbar-spacer"></div>
+      </header>
+
+      <main id="messages" class="messages">
+        <div class="hero" id="hero">
+          <div class="hero-inner">
+            <h1 class="hero-title">Fetcher.io</h1>
+            <p class="hero-subtitle">
+              Your AdventureWorks data assistant. Ask a question in plain
+              English — I'll pull the real numbers from the database.
+            </p>
+            <div class="hero-suggestions">
+              <button type="button" class="suggestion-card">📊 Top 10 products by list price</button>
+              <button type="button" class="suggestion-card">👥 How many employees work in Sales?</button>
+              <button type="button" class="suggestion-card">🌍 Which territories generated the most revenue?</button>
+              <button type="button" class="suggestion-card">🏭 Which vendors supply the most products?</button>
+            </div>
+          </div>
+        </div>
+        <div class="messages-inner" id="messagesInner"></div>
+      </main>
+
+      <div class="composer-wrap">
+        <form id="composer" class="composer">
+          <textarea
+            id="input"
+            rows="1"
+            autocomplete="off"
+            placeholder="Message Fetcher.io…"
+            aria-label="Message"
+          ></textarea>
+          <button id="send" type="submit" aria-label="Send message">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="config.js"></script>
+  <script src="chat.js"></script>
+</body>
+</html>
