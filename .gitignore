@@ -19,11 +19,12 @@ build/
 venv/
 env/
 .venv/
-.env/
+proj/
 
 # Data files (runtime-generated)
 calling/data/
 data/
+output/
 
 # Logs
 *.log
@@ -45,7 +46,3 @@ htmlcov/
 # Misc
 *.bak
 *.tmp
-
-proj/
-
-output/ 

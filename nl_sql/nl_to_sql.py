@@ -87,9 +87,17 @@ def nl_to_sql(question: str) -> tuple[str, float]:
     except Exception:
         log.debug("LLM full response object | %s", response)
 
-    raw = re.sub(r"^```(?:sql)?\s*", "", raw, flags=re.IGNORECASE)
-    raw = re.sub(r"\s*```$", "", raw)
-    sql = raw.strip()
+    # The model sometimes prefixes the query with prose before a fenced code
+    # block (e.g. "To do X, use:\n```sql\nSELECT ...\n```"). Prefer the fenced
+    # block's contents wherever it appears; fall back to stripping fences
+    # anchored at the start/end for the common "SQL-only" response case.
+    fenced = re.search(r"```(?:sql)?\s*(.*?)\s*```", raw, flags=re.IGNORECASE | re.DOTALL)
+    if fenced:
+        sql = fenced.group(1).strip()
+    else:
+        raw = re.sub(r"^```(?:sql)?\s*", "", raw, flags=re.IGNORECASE)
+        raw = re.sub(r"\s*```$", "", raw)
+        sql = raw.strip()
 
     log.debug("LLM parsed SQL | sql=%r", sql)
     return sql, elapsed

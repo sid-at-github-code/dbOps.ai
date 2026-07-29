@@ -2,7 +2,7 @@
 WhatsApp / Twilio Messaging utilities.
 
 All functions are pure and stateless — pass in what they need.
-Wire them into Flask, FastAPI, or any other framework.
+Wire them into FastAPI or any other framework.
 
 Quick start:
     from shared.conversation import ConversationStore
@@ -12,12 +12,9 @@ Quick start:
     store  = ConversationStore(system_prompt=SYSTEM_PROMPT)
     client = make_openrouter_client()
 
-    sender, text = parse_incoming(request.form)
+    sender, text = parse_incoming({"From": From, "Body": Body})
     reply = get_ai_reply(sender, text, store=store, ai_client=client)
-    return twiml_reply(reply)
-    
-    
-    utility file for main nl to sql pipepline oonly rools   
+    return Response(content=twiml_reply(reply), media_type="text/xml")
 """
 
 import logging
@@ -76,13 +73,13 @@ def get_ai_reply(
 
 # ── TwiML response builder ────────────────────────────────────────────────────
 
-def twiml_reply(text: str) -> tuple[str, int, dict[str, str]]:
+def twiml_reply(text: str) -> str:
     """
     Build a TwiML MessagingResponse.
 
-    Returns a (body, status_code, headers) tuple — drop straight into Flask:
-        return twiml_reply("Hello!")
+    Returns the raw XML string — wrap it in a framework Response, e.g. FastAPI:
+        return Response(content=twiml_reply("Hello!"), media_type="text/xml")
     """
     resp = MessagingResponse()
     resp.message(text)
-    return str(resp), 200, {"Content-Type": "text/xml"}
+    return str(resp)

@@ -12,7 +12,7 @@ agentic-fetcher/
 ├── api/             FastAPI routers (dashboard query + public v1)
 ├── static/          Frontend dashboard (HTML/CSS/JS, no build step)
 ├── channels/
-│   ├── whatsapp/    Twilio WhatsApp bot (Flask)
+│   ├── whatsapp/    Twilio WhatsApp bot (FastAPI)
 │   └── telegram/    Telegram bot (python-telegram-bot, polling)
 ├── calling/         Voice agent (FastAPI + Twilio + Gemini Live WS)
 ├── shared/          Cross-cutting utilities (AI clients, conversation store, prompts)
@@ -115,12 +115,12 @@ Vanilla JS, no build step. Served by `start_dashboard.py`.
 
 ### `channels/whatsapp/` — WhatsApp bot
 
-Framework: **Flask** (sync). Uses Twilio Sandbox → webhook.
+Framework: **FastAPI**. Uses Twilio Sandbox → webhook.
 
 | File | Purpose |
 |---|---|
-| `utils.py` | `parse_incoming(form_data)→(sender,msg)`, `get_ai_reply(...)→str`, `twiml_reply(text)→(body,200,headers)` |
-| `webhook.py` | Flask app. `POST /webhook` handles Twilio callbacks. **Run this.** |
+| `utils.py` | `parse_incoming(form_data)→(sender,msg)`, `get_ai_reply(...)→str`, `twiml_reply(text)→str` (raw TwiML XML) |
+| `webhook.py` | FastAPI app. `POST /webhook` handles Twilio callbacks. **Run this.** |
 
 **Run:**
 ```bash
@@ -227,7 +227,8 @@ Mock patch targets:
 |---|---|---|
 | `python start_dashboard.py` | Dashboard UI + `/api/query` | 8000 (`DASHBOARD_PORT`) |
 | `python start_api.py` | Public API + Swagger at `/docs` | 8001 (`API_PORT`) |
-| `python -m channels.whatsapp.webhook` | WhatsApp Flask bot | 5000 (`PORT`) |
+| `python -m channels.whatsapp.webhook` | WhatsApp FastAPI bot | 5000 (`PORT`) |
+| `python run_all.py` | Dashboard + public API + WhatsApp bot together | 8000/8001/5000 |
 | `python -m channels.telegram.bot` | Telegram polling bot | — |
 | `python -m calling.app` | Voice agent (FastAPI + WS) | 8000 (`PORT`) |
 
